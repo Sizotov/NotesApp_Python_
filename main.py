@@ -5,6 +5,7 @@ from datetime import datetime
 
 class Note:
     def __init__(self, id, title, body, creation_time):
+        self.create_time = None
         self.id = id
         self.title = title
         self.body = body
@@ -22,15 +23,15 @@ class Note:
     @classmethod
 
     def from_dict(cls, d):
-        return cls(
-            id=d["id"],
-            title=d["title"],
-            body=d["body"],
-            creation_time=datetime.fromisoformat(d["creation_time"]),
-        )
+        id = d["id"],
+        title = d["title"],
+        body = d["body"],
+        creation_time = datetime.strptime(d["creation_time"], '%Y - %m - % d % H: % M: %S')
+        return cls(id, title, body, creation_time)
     def __repr__(self):
         return f"<Note {self.title} ({self.id})>"
-    def load_notes(self):
+    @staticmethod
+    def load_notes():
         if os.path.exists("notes.json"):
             with open("notes.json", "r") as f:
                 data = json.load(f)
@@ -38,7 +39,8 @@ class Note:
             data = {"notes": []}
         return data
 
-    def save_notes(data):
+    @staticmethod
+    def save_notes():
         with open("notes.json", "w") as f:
             json.dump(data, f, indent=4)
 
@@ -49,10 +51,11 @@ class Note:
         id = len(data["notes"]) + 1
         note = Note(id, title, body, timestamp)
         data["notes"].append(note.to_dict())
-        self.save_notes(data)
+        self.save_notes()
         print(f"Заметка '{title}' создана.")
 
-    def read_note(self):
+    @staticmethod
+    def read_note():
         identifier = input("Введите id заметки или заголовок: ")
         for note_dict in data["notes"]:
             if str(note_dict["notes"]) == identifier or note_dict["title"] == identifier:
@@ -73,7 +76,7 @@ class Note:
                 note_dict["title"] = title or note_dict["title"]
                 note_dict["body"] = body or note_dict["body"]
                 note_dict["last_modified_time"] = str(datetime.now())
-                self.save_notes(data)
+                self.save_notes()
                 print(f"Заметка '{note_dict['title']}' обновлена.")
                 return
             print(f"Заметка '{identifier}' не найдена.")
@@ -83,12 +86,13 @@ class Note:
         for note_dict in data["notes"]:
             if str(note_dict["id"]) == identifier or note_dict["title"] == identifier:
                 data["notes"].remove(note_dict)
-                self.save_notes(data)
+                self.save_notes()
                 print(f"Заметка '{note_dict['title']}' удалена.")
                 return
             print(f"Заметка '{identifier}' не найдена.")
 
-    def list_notes(self):
+    @staticmethod
+    def list_notes():
         for note_dict in data["notes"]:
             note = Note.from_dict(note_dict)
             print(note.title)
@@ -103,7 +107,9 @@ class Note:
 
         while True:
             action = input(
-                "Введите 'n' чтобы создать новую заметку, 'r' чтобы читать заметку, 'u' чтобы обновить заметку, 'd' удалить заметку, 'l' чтобы выводить списком все заметки, или 'q' выйти из заметки: ")
+                "Введите 'n' чтобы создать новую заметку, 'r' чтобы читать заметку,"
+                " 'u' чтобы обновить заметку, 'd' удалить заметку,"
+                " 'l' чтобы выводить списком все заметки, или 'q' из заметки: ")
             if action == "n":
                 self.create_note()
             elif action == "r":
@@ -118,7 +124,3 @@ class Note:
                 break
             else:
                 print("Некорректное действие.")
-
-    if __name__ == "__main__":
-        main()
-
